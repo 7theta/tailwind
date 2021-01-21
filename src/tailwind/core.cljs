@@ -21,14 +21,7 @@
     (cond-> class-str
       (= :react-native (j/platform)) tw-rn)))
 
-(def ^:private get-color-rn
-  (when (exists? js/require) (.-getColor (js/require "tailwind-rn"))))
-
 (defn class->color
   [class]
-  (case (j/platform)
-    :web
-    (j/get-in colors (->> (st/split (name class) #"\-")
-                          (remove #{"bg" "text" "border"})))
-    :react-native
-    (get-color-rn class)))
+  (j/get-in colors (->> (st/split (name class) #"\-")
+                        (remove #{"bg" "text" "border"}))))

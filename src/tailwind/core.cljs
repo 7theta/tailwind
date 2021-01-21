@@ -12,11 +12,23 @@
             [utilis.js :as j]
             [clojure.string :as st]))
 
+(def ^:private tw-rn
+  (when (exists? js/require) (js/require "tailwind-rn")))
+
 (defn tw
   [classes]
-  (st/join " " (map name classes)))
+  (let [class-str (st/join " " (map name classes))]
+    (cond-> class-str
+      (= :react-native (j/platform)) tw-rn)))
+
+(def ^:private get-color-rn
+  (when (exists? js/require) (.-getColor (js/require "tailwind-rn"))))
 
 (defn class->color
-  [class-name]
-  (j/get-in colors (->> (st/split (name class-name) #"\-")
-                        (remove #{"bg" "text" "border"}))))
+  [class]
+  (case (j/platform)
+    :web
+    (j/get-in colors (->> (st/split (name class) #"\-")
+                          (remove #{"bg" "text" "border"})))
+    :react-native
+    (get-color-rn class)))

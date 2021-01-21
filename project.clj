@@ -7,10 +7,11 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any others, from this software.
 
-(defproject com.7theta/tailwind "1.11.0"
+(defproject com.7theta/tailwind "0.1.0"
   :description "Library working with Tailwind css"
   :url "https://github.com/7theta/tailwind"
   :license {:name "MIT License"
             :url "https://opensource.org/licenses/MIT"}
+  :dependencies [[com.7theta/utilis "1.12.0"]]
   :scm {:name "git"
         :url "https://github.com/7theta/tailwind"})

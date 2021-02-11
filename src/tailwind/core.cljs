@@ -8,20 +8,39 @@
 ;;   You must not remove this notice, or any others, from this software.
 
 (ns tailwind.core
-  (:require ["tailwindcss/colors" :as colors]
+  (:require [integrant.core :as ig]
             [utilis.js :as j]
             [clojure.string :as st]))
 
-(def ^:private tw-rn
-  (when (exists? js/require) (js/require "tailwind-rn")))
+(declare created tw-rn colors)
+
+(defmethod ig/init-key :tailwind/config
+  [_ {:keys [styles]}]
+  (reset! created (j/call tw-rn :create (clj->js styles))))
 
 (defn tw
   [classes]
   (let [class-str (st/join " " (map name classes))]
     (cond-> class-str
-      (= :react-native (j/platform)) tw-rn)))
+      (= :react-native (j/platform)) ((or (:tailwind @created) tw-rn)))))
 
 (defn class->color
   [class]
-  (j/get-in colors (->> (st/split (name class) #"\-")
-                        (remove #{"bg" "text" "border"}))))
+  (if (= :react-native (j/platform))
+    (j/call (or @created tw-rn) :getColor (name class))
+    (j/get-in colors (->> (st/split (name class) #"\-")
+                          (remove #{"bg" "text" "border"})))))
+
+
+;;; Private
+
+(defn- try-require [s]
+  (when (exists? js/require)
+    (try
+      (js/require s)
+      (catch :default _
+        nil))))
+
+(def ^:private created (atom nil))
+(def ^:private tw-rn (try-require "tailwind-rn"))
+(def ^:private colors (try-require "tailwindcss/colors"))

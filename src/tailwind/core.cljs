@@ -20,7 +20,7 @@
 
 (defn tw
   [classes]
-  (let [class-str (st/join " " (map name classes))]
+  (let [class-str (->> classes (filter keyword?) (map name) (st/join " " ))]
     (cond-> class-str
       (= :react-native (j/platform)) ((or (:tailwind @created) tw-rn)))))
 

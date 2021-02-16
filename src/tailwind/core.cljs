@@ -21,15 +21,19 @@
 (defn tw
   [classes]
   (let [class-str (->> classes (filter keyword?) (map name) (st/join " " ))]
-    (cond-> class-str
-      (= :react-native (j/platform)) ((or (:tailwind @created) tw-rn)))))
+    (if (= :react-native (j/platform))
+      (if @created
+        (j/call @created :tailwind class-str)
+        (tw-rn class-str))
+      class-str)))
 
 (defn class->color
   [class]
-  (if (= :react-native (j/platform))
-    (j/call (or @created tw-rn) :getColor (name class))
-    (j/get-in colors (->> (st/split (name class) #"\-")
-                          (remove #{"bg" "text" "border"})))))
+  (when class
+    (if (= :react-native (j/platform))
+      (j/call (or @created tw-rn) :getColor (name class))
+      (j/get-in colors (->> (st/split (name class) #"\-")
+                            (remove #{"bg" "text" "border"}))))))
 
 
 ;;; Private
